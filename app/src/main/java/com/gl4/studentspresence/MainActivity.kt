@@ -3,10 +3,7 @@ package com.gl4.studentspresence
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -19,23 +16,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var studentList = arrayListOf<Student>(
-            Student("jean paul", "m", false),
+        var studentList = arrayListOf(
+            Student("jean paul", "m", true),
             Student("abidi safa","f" ,true),
             Student("achour ines","f", true),
-            Student("sammari amal","f", false),
+            Student("sammari amal","f", true),
             Student("samet rayen","m", true),
-            Student("stefan françois", "m", true))
+            Student("stefan françois", "m", false))
 
         myAdapter = StudentListAdapter(studentList)
 
-        var listes = listOf("Presents","Absents")
+        var listes = listOf("presents","absents")
         spinner.adapter = ArrayAdapter(this,android.R.layout.simple_dropdown_item_1line,listes)
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val liste = listes.get(position)
                 Toast.makeText(this@MainActivity, "$liste", Toast.LENGTH_LONG).show()
+                myAdapter.filter.filter(liste)
             }
             override fun onNothingSelected(adapterView: AdapterView<*>?) {
             }
@@ -44,6 +42,5 @@ class MainActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = myAdapter
         }
-
     }
 }
