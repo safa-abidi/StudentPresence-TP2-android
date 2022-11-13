@@ -5,11 +5,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.RecyclerView
-import java.util.*
+import android.os.Handler
+import android.util.Log
 import kotlin.collections.ArrayList
 
 class StudentListAdapter(private val data: ArrayList<Student>):
     RecyclerView.Adapter<StudentListAdapter.ViewHolder>() , Filterable {
+    var dataFilterList = ArrayList<Student>()
+    var choice = "0"
+
+    init {
+        dataFilterList = data
+    }
+
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView
         val imageView: ImageView
@@ -29,40 +37,56 @@ class StudentListAdapter(private val data: ArrayList<Student>):
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = data[position].name
-        if (data[position].gender == "m") {
+        holder.textView.text = dataFilterList[position].name
+        if (dataFilterList[position].gender == "m") {
             holder.imageView.setImageResource(R.drawable.boss)
         } else {
             holder.imageView.setImageResource(R.drawable.businesswoman)
         }
-        holder.checkbox.isChecked = data[position].isPresent
+        holder.checkbox.isChecked = dataFilterList[position].isPresent
+
+        holder.checkbox.setOnCheckedChangeListener { _, isChecked ->
+            dataFilterList[position].isPresent = isChecked
+            Handler().postDelayed({
+                filter.filter(choice)
+            }, 300)
+        }
     }
 
     override fun getItemCount(): Int {
         return dataFilterList.size
     }
 
-    var dataFilterList = ArrayList<Student>()
-
-    init {
-        // INITIAL DATA
-        dataFilterList = data
-    }
-
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
-                val charSearch = constraint.toString()
-                    val resultList = ArrayList<Student>()
-                    for (student in data) {
-                        if (student.isPresent && charSearch == "presents"){
-                            resultList.add(student)
-                        }else if (!student.isPresent && charSearch == "absents"){
-                            resultList.add(student)
+                var present = constraint.toString() == "1"
+                var absent = constraint.toString() == "2"
+                choice = constraint.toString()
+
+                dataFilterList = if (!absent && !present) {
+                    data
+                } else {
+                    var resultList = arrayListOf<Student>()
+                    if(present){
+                        for(i in data) {
+                            if(i.isPresent)
+                            {
+                                resultList.add(i)
+                            }
                         }
                     }
-                    dataFilterList = resultList
-
+                    if(absent)
+                    {
+                        for(i in data) {
+                            if(!i.isPresent)
+                            {
+                                resultList.add(i)
+                            }
+                        }
+                    }
+                    resultList
+                }
                 val filterResults = FilterResults()
                 filterResults.values = dataFilterList
                 return filterResults
